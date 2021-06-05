@@ -43,7 +43,7 @@ IP 만으로는 언급된 문제들을 해결할 수 없어서 필요한 것이 
       - 현재 대부분 TCP사용
 
 ## UDP(User Datagram Protocol 사용자 데이터그램 프로토콜)
-<br>
+
 UDP는 TCP와 같은 계층에 있는 프로토콜이지만 기능이 거의 없다.
 - TCP 3 way handsake X
 - 데이터 전달 보증 X
