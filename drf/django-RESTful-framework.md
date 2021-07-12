@@ -1,5 +1,6 @@
-1. django REST framework
-===
+# 1. django REST framework
+
+
 
 ## 1-1.What is the meaning of RESTful
 
@@ -21,3 +22,16 @@ Django는 View 클래스 자체가 RESTful한 서버를 만들기 최적인 프�
 	- 문서화 및 커뮤니티 지원이 잘 되어있다.
 
 ## 1-3. Serializer (직렬화)
+
+- 직렬화: 추상적인 object를 구체적이고 저장가능하고 전송가능한 텍스트파일 (연속된 byte파일 = stream of bytes)로 바꿔주는 것
+- 역직렬화: 텍스트파일(연속된 byte 파일 = stream of bytes)를 직렬화된 데이터 포맷형태로 추상적인 object 데이터로 바꿔주는 것
+
+JSON, XML, YAML과 같은 문서 포맷이 주로 직렬화의 대상
+
+- 직렬화를 하는 이유
+	- object는 메모리에 존재하고 추상적인데에 비해 string of bytes 데이터는 드라이브에 저장할 수 있고, 통신으로도 전송 가능하기 때문
+
+- 과정
+	(서버와 클라이언트가 데이터를 주고 받을 때)
+	- 1. object 에서 json 파일로 직렬화해 전송
+	- 2. 다운로드 받으면 json 파일을 역직렬화해 object복구
