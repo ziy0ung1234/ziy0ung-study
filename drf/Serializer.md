@@ -8,6 +8,13 @@ REST framework는 `ModelSerializer`(모델 인스턴스와 쿼리셋을 다루�
 
 ## Difference of ModelSerializer & Serializer
 
+- serializer를 만들때 모델을 다시 한번 작성하는 것처럼 각각의 필드및 속성들을 정의해주면서 필드의 내용들이 모델과 중복되는 경우가 생겼고, `create()` 메소드와 `update()` 메소드를 직접 정의해야 하는 불편함 덜어줄 수 있는 것이 ModelSerializer이다.
+
+### 3 functions of ModelSerializers
+- (의존하고 있는 모델에 기반해서) Serializer 필드를 자동으로 생성
+- Serializer를 위한 validator 제공 : ex) unique_together_validators
+- .create(), .update() 함수 기본으로 제공하여 다시 만들 필요 없음 
+
 ## Example
 
 ### Declaring Serializers
@@ -57,3 +64,28 @@ json = JSONRenderer().render(serializer.data)
 json
 # b'{"email":"leila@example.com","content":"foo bar","created":"2016-01-27T15:17:10.375877"}'
 ```
+
+### Deserializing objects
+
+역직렬화도 비슷하다. 먼저 파이썬 데이터 형식으로 스트림을 parsing 한다.
+
+_💡 parsing : 구문 분석, 데이터를 분해 분석해 원하는 형태로 조립하고 다시 빼내는 프로그램. 웹상에서 주어진 정보를 내가 원하는 형태로 가공하여 서버에서 불러들이는 것 💡_
+
+```py
+from django.utils.six import BytesIO
+from rest_framework.parsers import JSONParser
+
+stream = BytesIO(json)
+data = JSONParser().parse(stream)
+``` 
+
+기본 데이터 유형을 검증 된 데이터 dict로 복원
+```py
+serializer = CommentSerializer(data=data)
+serializer.is_valid()
+# True
+serializer.validated_data
+# {'content': 'foo bar', 'email': 'leila@example.com', 'created': datetime.datetime(2012, 08, 22, 16, 20, 09, 822243)}
+```
+
+
