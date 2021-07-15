@@ -1,4 +1,4 @@
-#5. Authentication & Permissions
+# 5. Authentication & Permissions
 
 Currently, anyone can modify or delete code snippets, So need to add a few things.
 
@@ -39,8 +39,8 @@ python manage.py createsuperuser
 
 ## Add User model Endpoint
 
-- add users in serializers.py
-- Because the relationship of the User model and snippets is 'reverse', snippets doesn't include automatically when we use Modelserializer class. So have to add fields explicitly.
+### add users in serializers.py
+- Because the relationship of the User model and snippets is 'reverse', snippets is not include automatically when we use Modelserializer class. So have to add fields explicitly.
 
 ```py
 from django.contrib.auth.models import User
@@ -53,8 +53,37 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'snippets']
 ```
 
-- modify views.py
+### modify views.py
 - To only use read-only views, use ListAPIView & RetrieveAPIView of generic
 
+### modify snippets/urls.py
+
+```py
+path('users/', views.UserList.as_view()),
+path('users/<int:pk>/', views.UserDetail.as_view()),
+```
+
+## Connecting Snippets and Users
+
+When code snippet is created, it is not yet associated with the user. The user is not automatically serialized yet, but it comes in as a request attribute.
+
+This can be solved by overriding the `.perform_create()` method in snippet view. This allows you to manage how the instance will be stored and clarify the information comming into the request.
+
+### Add some codes in SnippetList view class
+
+```py
+def perform_create(self, serializer):
+        serializer.save(owner=self.request.user)
+```
+
+Now serializer's `create()` method will forward the owner field with the validated data.
+
+### Modifying the serializer
+
+Now the snippet and the user who made it are connected. This should be reflected in the Snippet Serializer, also in the meta class too
+
+```py
+owner = serializers.ReadOnlyField(source='owner.username')
+```
 
 
