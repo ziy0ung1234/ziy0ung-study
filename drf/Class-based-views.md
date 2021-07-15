@@ -115,7 +115,7 @@ class SnippetList(  mixins.ListModelMixin,
 SnippetDetail class
 
 	- GenericAPIView + (RetrieveModelMixin + UpdateModelMixin, DestroyModelMixin)
-	-use retrieve(), update(), destroy() functions
+	- use retrieve(), update(), destroy() functions
 
 ```py
 class SnippetDetail(mixins.RetrieveModelMixin,
@@ -139,7 +139,7 @@ class SnippetDetail(mixins.RetrieveModelMixin,
 
 - mix & use Mixins
 - simpler code
-- dont need return
+- don't need return
 
 ```py
 from snippets.models import Snippet
