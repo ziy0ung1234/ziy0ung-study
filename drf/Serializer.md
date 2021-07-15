@@ -92,7 +92,7 @@ snippet.save()
 ```
 
 - 직렬화 (instance to json)
-``py
+```py
 >>> serializer = SnippetSerializer(snippet)
 >>> serializer.data
 {'id': 4, 'title': '', 'code': 'print("hello, world")\n', 'linenos': False, 'language': 'python', 'style': 'friendly'}
@@ -138,4 +138,105 @@ False
 >>> serializer.data
 [OrderedDict([('id', 1), ('title', ''), ('code', 'foo = "bar"\n'), ('linenos', False), ('language', 'python'), ('style', 'friendly')]), OrderedDict([('id', 2), ('title', ''), ('code', 'print("hello, world")\n'), ('linenos', False), ('language', 'python'), ('style', 'friendly')]), OrderedDict([('id', 3), ('title', ''), ('code', 'foo = "bar"\n'), ('linenos', False), ('language', 'python'), ('style', 'friendly')]), OrderedDict([('id', 4), ('title', ''), ('code', 'print("hello, world")\n'), ('linenos', False), ('language', 'python'), ('style', 'friendly')]), OrderedDict([('id', 5), ('title', ''), ('code', 'print("hello, world")'), ('linenos', False), ('language', 'python'), ('style', 'friendly')])]
 ```
+### ModelSerializer
+
+- Modifying serializers
+```py
+class SnippetSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Snippet
+        fields = ['id', 'title', 'code', 'linenos', 'language', 'style']
+```
+
+- check in the shell
+```py
+>>> from snippets.serializers import SnippetSerializer
+>>> serializer = SnippetSerializer()
+>>> print(repr(serializer))
+SnippetSerializer():
+    id = IntegerField(read_only=True)
+    title = CharField(allow_blank=True, max_length=100, required=False)
+    code = CharField(style={'base_template': 'textarea.html'})
+    linenos = BooleanField(required=False)
+    language = ChoiceField(choices=[('abap', 'ABAP'), ('abnf', 'ABNF')...
+    style = ChoiceField(choices=[('autumn', 'autumn'), ('borland', 'borland'), ...
+```
+
+### Declaring Views
+
+- Read, Create
+	- GET : Show existing snippets
+	- POST : Create new snippets
+
+```py
+from django.http import HttpResponse, JsonResponse
+from rest_framework.parsers import JSONParser
+from snippets.models import Snippet
+from snippets.serializers import SnippetSerializer
+
+def snippetList(request):
+    """
+    List all code snippets, or create a new snippet.
+    """
+    if request.method == 'GET':
+        snippets = Snippet.objects.all()
+        serializer = SnippetSerializer(snippets, many=True)
+        return JsonResponse(serializer.data, safe=False)
+
+    elif request.method == 'POST':
+        data = JSONParser().parse(request)
+        serializer = SnippetSerializer(data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer, status=201)
+        return JsonResponse(serializer, status=400)
+```
+
+- Read, Update, Delete
+
+```py
+def snippetDetail(request, pk):
+    """
+    Retrieve, update or delete a code snippet.
+    """
+    try:
+        snippet = Snippet.object.get(pk=pk)
+    except:
+        return HttpResponse(status=404)
+
+    if request.method == 'GET':
+        serializer = SnippetSerializer(snippet)
+        return JsonResponse(serializer.data)
+
+    elif request.method == 'PUT':
+        data = JSONParser().parse(request)
+        serializer = SnippetSerializer(snippet, data=data)
+        if serializer.is_valid():
+            serializer.save()
+            return JsonResponse(serializer.data)
+        return JsonResponse(serializer.errors, status=400)
+
+    elif request.method == 'DELETE':
+        snippet.delete()
+        return HttpResponse(status=204)
+```
+- setting urls.py
+
+```py
+# snippets/urls.py
+from django.urls import path
+from snippets import views
+
+urlpatterns = [
+    path('snippets/', views.snippetList),
+    path('snippets/<int:pk>/', views.snippetDetail),
+]
+# tutorial/urls.py
+from django.urls import path, include
+
+urlpatterns = [
+    path('', include('snippets.urls')),
+]
+```
+
 
